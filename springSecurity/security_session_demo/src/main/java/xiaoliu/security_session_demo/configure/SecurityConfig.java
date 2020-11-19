@@ -3,6 +3,8 @@ package xiaoliu.security_session_demo.configure;
 import cn.hutool.log.Log;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -26,10 +28,24 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return NoOpPasswordEncoder.getInstance();
     }
 
+    /**
+     * 角色继承
+     * 在配置时，需要给角色手动加上 ROLE_ 前缀。ROLE_admin > ROLE_user 的配置表示 ROLE_admin 自动具备 ROLE_user 的权限。
+     * 在这里需要注意 RoleHierarchyImpl 这个实现类中buildRolesReachableInOneStepMap方法中会有进行字符串切割的操作
+     * 	String[] roles = line.trim().split("\\s+>\\s+");
+     * 	所以需要留一个空格或者多个空格
+     * @return
+     */
+    @Bean
+    RoleHierarchy roleHierarchy() {
+        RoleHierarchyImpl hierarchy = new RoleHierarchyImpl();
+        hierarchy.setHierarchy("ROLE_admin > ROLE_user");
+        return hierarchy;
+    }
+
 //    /**
 //     *
-//     * @param auth
-//     * @throws Exception
+//     * @param authUsernamePasswordAuthenticationToken
 //     */
 //    @Override
 //    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
