@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: xiaoliu.security_session_demo.SecuritySessionDemoApplicationTests
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 7.295 s - in xiaoliu.security_session_demo.SecuritySessionDemoApplicationTests
