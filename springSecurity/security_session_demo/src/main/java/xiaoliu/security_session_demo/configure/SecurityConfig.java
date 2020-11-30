@@ -9,8 +9,10 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.session.ConcurrentSessionFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.stereotype.Component;
 
@@ -86,26 +88,42 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         log.info(">>>>>>>>>>>>>>设置安全配置");
         http.authorizeRequests()
+
                 .anyRequest().authenticated()
                 .and()
                 .formLogin()
                 .loginPage("/login.html")
-//                .loginProcessingUrl("/doLogin")
+                .loginProcessingUrl("/doLogin")
+                //修改表单名称和密码
 //                .usernameParameter("username")
 //                .passwordParameter("password")
-                .defaultSuccessUrl("/doLogin")
-                .successForwardUrl("/doLogin")
-                .and()
-                .logout()
-                .logoutUrl("/logout")
-                .logoutRequestMatcher(new AntPathRequestMatcher("/logout","POST"))
-                .logoutSuccessUrl("/index")
-                .deleteCookies()
-                .clearAuthentication(true)
-                .invalidateHttpSession(true)
+                //成功后按照之前访问路径跳转 , 没有则默认跳转index.html页面
+//                .defaultSuccessUrl("/index.html",true)
+                //这里是接口认证成功后才会跳转页面
+                .successForwardUrl("/doLogin2")
+                //如果没有进行放行 , 那么每一次登录都要进行认证 , 会造成死循环
                 .permitAll()
                 .and()
-                .csrf().disable();
+                .logout()
+                //系统默认是get请求
+                .logoutUrl("/logout")
+//                .logoutRequestMatcher(new AntPathRequestMatcher("/logout","POST"))
+                .logoutSuccessUrl("/logOut.html")
+                .deleteCookies()
+//                .clearAuthentication(true)
+//                .invalidateHttpSession(true)
+                .permitAll()
+                .and()
+                .csrf().disable()
+                //单用户登录的思路有两种 , 此时需要注入bean HttpSessionEventPublisher
+                //1. 设置登录session只能有一个 , 此时新登录会把旧登录踢下线
+//                .sessionManagement().maximumSessions(1)
+//                //2. 如果旧用户登录 , 新登录则禁止
+//                .maxSessionsPreventsLogin(true)
+        ;
+
+
+//        http.sessionManagement().maximumSessions(1);
     }
 
     /**
